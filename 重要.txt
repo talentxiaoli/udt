@@ -1,0 +1,35 @@
+四次握手数据交互
+
+第一次握手 client -> server
+CHandShake m_ConnReq
+m_iVersion : 版本号 = AF_INET
+m_iType ：传输层协议类型 = SOCK_DGRAM
+m_iMSS : 类似于MTU = 1500
+m_iFlightFlagSize ： 流量控制窗口大小(应当可以理解为我端能接受的最大数据流量) = (m_iRcvBufSize < m_iFlightFlagSize)? m_iRcvBufSize : m_iFlightFlagSize; (前者8192，后者25600)
+m_iReqType ： 请求类型 = 1
+m_iID ： m_SocketId 
+m_piPeerIP ： 服务端ip地址
+m_iISN : 一个随机值 [0, 0x7FFFFFFF] 这个挺重要的，作为各种号的初始值
+   m_iLastDecSeq = m_iISN - 1;
+   m_iSndLastAck = m_iISN;
+   m_iSndLastDataAck = m_iISN;
+   m_iSndCurrSeqNo = m_iISN - 1;
+   m_iSndLastAck2 = m_iISN;
+
+其他初始化信息
+m_ullSndLastAck2Time = CTimer::getTime();
+m_llLastReqTime = CTimer::getTime();
+
+第一次握手响应 server -> client
+m_cookie : 服务端生成的cookie信息
+m_iID : 等于上面的m_iID
+其余信息不变
+
+第二次握手请求
+m_iReqType 请求类型更改为-1
+m_cookie : 携带上服务端返回的cookie
+其余请求信息保持不变
+
+第二次握手响应
+1.将服务端一些相似信息带回给客户端
+2.将第二次握手请求的一些信息记录在本地
